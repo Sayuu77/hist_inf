@@ -3,13 +3,9 @@ import streamlit as st
 import base64
 from openai import OpenAI
 import openai
-from PIL import Image, ImageOps
+from PIL import Image
 import numpy as np
-import pandas as pd
 from streamlit_drawable_canvas import st_canvas
-
-Expert=" "
-profile_imgenh=" "
 
 # Inicializar session_state
 if 'analysis_done' not in st.session_state:
@@ -27,117 +23,228 @@ def encode_image_to_base64(image_path):
     except FileNotFoundError:
         return "Error: La imagen no se encontró en la ruta especificada."
 
+# Configuración de página
+st.set_page_config(
+    page_title="Mythos Canvas - Análisis Mitológico",
+    page_icon="🔮",
+    layout="centered"
+)
 
-# Streamlit 
-st.set_page_config(page_title='Tablero Inteligente')
-st.title('Tablero Inteligente')
+# Estilos con tema rosa pastel
+st.markdown("""
+<style>
+    .main-title {
+        font-size: 2.8rem;
+        color: #8B4789;
+        text-align: center;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #8B4789, #E6A8D7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .subtitle {
+        font-size: 1.2rem;
+        color: #666;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .sidebar-section {
+        background: linear-gradient(135deg, #F8E6F2, #F0D4E6);
+        padding: 1.5rem;
+        border-radius: 16px;
+        margin: 1rem 0;
+        border: 1px solid #E6A8D7;
+    }
+    .canvas-container {
+        background: linear-gradient(135deg, #FDF6F8, #FAF0F4);
+        border: 3px solid #E6A8D7;
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 1rem 0;
+        box-shadow: 0 8px 25px rgba(139, 71, 137, 0.1);
+    }
+    .analyze-btn {
+        background: linear-gradient(135deg, #8B4789, #D8A1C4);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 1rem 0;
+        width: 100%;
+    }
+    .analyze-btn:hover {
+        background: linear-gradient(135deg, #7A3A78, #C891B4);
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+    .response-box {
+        background: linear-gradient(135deg, #F8F0F5, #F4E8F1);
+        border: 2px solid #E6A8D7;
+        border-radius: 16px;
+        padding: 2rem;
+        margin: 1rem 0;
+        box-shadow: 0 4px 15px rgba(139, 71, 137, 0.1);
+    }
+    .mythology-section {
+        background: linear-gradient(135deg, #FFF0F5, #FFE4EC);
+        border: 2px solid #D8A1C4;
+        border-radius: 16px;
+        padding: 2rem;
+        margin: 1rem 0;
+    }
+    .section-title {
+        color: #8B4789;
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #E6A8D7;
+        padding-bottom: 0.5rem;
+    }
+    .api-input {
+        background: white;
+        border: 2px solid #E6A8D7;
+        border-radius: 10px;
+        padding: 10px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Header principal
+st.markdown('<div class="main-title">🔮 Mythos Canvas</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Descubre los secretos mitológicos y científicos de tus dibujos</div>', unsafe_allow_html=True)
+
+# Sidebar
 with st.sidebar:
-    st.subheader("Acerca de:")
-    st.subheader("En esta aplicación veremos la capacidad que ahora tiene una máquina de interpretar un boceto")
-st.subheader("Dibuja el boceto en el panel y presiona el botón para analizarla")
+    st.markdown("### ⚙️ Configuración")
+    
+    with st.container():
+        st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
+        st.markdown("**🎨 Herramientas de Dibujo**")
+        stroke_width = st.slider('Ancho del trazo', 1, 25, 8)
+        stroke_color = st.color_picker('Color del trazo', '#8B4789')
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with st.container():
+        st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
+        st.markdown("**🔑 Configuración API**")
+        api_key = st.text_input('Clave de OpenAI', type="password", 
+                               help="Ingresa tu API key de OpenAI para usar la inteligencia artificial")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown("---")
+    st.markdown("### 📖 Acerca de")
+    st.markdown("""
+    **Mythos Canvas** analiza tus dibujos y revela:
+    - **Mitología** relacionada
+    - **Datos científicos** fascinantes  
+    - **Historia** y simbolismo
+    - **Conexiones culturales**
+    """)
 
-# Add canvas component
-drawing_mode = "freedraw"
-stroke_width = st.sidebar.slider('Selecciona el ancho de línea', 1, 30, 5)
-stroke_color = "#000000" 
-bg_color = '#FFFFFF'
+# Área principal de dibujo
+st.markdown('<div class="section-title">✏️ Panel de Dibujo</div>', unsafe_allow_html=True)
+st.markdown('<div class="canvas-container">', unsafe_allow_html=True)
 
-# Create a canvas component
 canvas_result = st_canvas(
-    fill_color="rgba(255, 165, 0, 0.3)",
+    fill_color="rgba(139, 71, 137, 0.2)",
     stroke_width=stroke_width,
     stroke_color=stroke_color,
-    background_color=bg_color,
-    height=300,
-    width=400,
-    drawing_mode=drawing_mode,
+    background_color="#FFFFFF",
+    height=400,
+    width=600,
+    drawing_mode="freedraw",
     key="canvas",
 )
 
-ke = st.text_input('Ingresa tu Clave', type="password")
-os.environ['OPENAI_API_KEY'] = ke
+st.markdown('</div>', unsafe_allow_html=True)
 
-# Retrieve the OpenAI API Key
-api_key = os.environ['OPENAI_API_KEY']
+# Botón de análisis
+if st.button("🔍 Analizar Dibujo Mitológico", use_container_width=True, type="primary"):
+    if canvas_result.image_data is not None and api_key:
+        with st.spinner("🔮 Consultando los secretos del universo..."):
+            # Procesar imagen
+            input_numpy_array = np.array(canvas_result.image_data)
+            input_image = Image.fromarray(input_numpy_array.astype('uint8')).convert('RGBA')
+            input_image.save('img.png')
+            
+            # Codificar imagen
+            base64_image = encode_image_to_base64("img.png")
+            st.session_state.base64_image = base64_image
+            
+            # Prompt mejorado para análisis mitológico y científico
+            prompt_text = """Analiza este dibujo y proporciona:
+            
+1. **ANÁLISIS MITOLÓGICO**: 
+   - ¿Qué figuras mitológicas podrían estar representadas?
+   - Significado simbólico en diferentes mitologías
+   - Historias o leyendas relacionadas
 
-# Initialize the OpenAI client with the API key
-client = OpenAI(api_key=api_key)
+2. **DATOS CIENTÍFICOS**:
+   - Explicación científica si corresponde a fenómenos naturales
+   - Curiosidades relevantes
+   - Perspectiva histórica o antropológica
 
-analyze_button = st.button("Analiza la imagen", type="secondary")
+3. **INTERPRETACIÓN CULTURAL**:
+   - Simbolismo en diferentes culturas
+   - Representaciones artísticas similares
 
-# Check if an image has been uploaded, if the API key is available, and if the button has been pressed
-if canvas_result.image_data is not None and api_key and analyze_button:
+Responde en español, sé detallado pero conciso, separando claramente cada sección."""
+            
+            try:
+                os.environ['OPENAI_API_KEY'] = api_key
+                client = OpenAI(api_key=api_key)
+                
+                response = openai.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [
+                                {"type": "text", "text": prompt_text},
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:image/png;base64,{base64_image}",
+                                    },
+                                },
+                            ],
+                        }
+                    ],
+                    max_tokens=800,
+                )
+                
+                if response.choices[0].message.content is not None:
+                    full_response = response.choices[0].message.content
+                    
+                    # Guardar en session_state
+                    st.session_state.full_response = full_response
+                    st.session_state.analysis_done = True
+                    
+            except Exception as e:
+                st.error(f"❌ Error en el análisis: {str(e)}")
+    else:
+        if not api_key:
+            st.warning("🔑 Por favor ingresa tu API key de OpenAI")
+        if canvas_result.image_data is None:
+            st.info("🎨 Dibuja algo en el panel para analizar")
 
-    with st.spinner("Analizando ..."):
-        # Encode the image
-        input_numpy_array = np.array(canvas_result.image_data)
-        input_image = Image.fromarray(input_numpy_array.astype('uint8')).convert('RGBA')
-        input_image.save('img.png')
-        
-        # Codificar la imagen en base64
-        base64_image = encode_image_to_base64("img.png")
-        st.session_state.base64_image = base64_image
-            
-        prompt_text = (f"Describe in spanish briefly the image")
-    
-        # Make the request to the OpenAI API
-        try:
-            full_response = ""
-            message_placeholder = st.empty()
-            response = openai.chat.completions.create(
-              model= "gpt-4o-mini",
-              messages=[
-                {
-                   "role": "user",
-                   "content": [
-                     {"type": "text", "text": prompt_text},
-                     {
-                       "type": "image_url",
-                       "image_url": {
-                         "url": f"data:image/png;base64,{base64_image}",
-                       },
-                     },
-                   ],
-                  }
-                ],
-              max_tokens=500,
-              )
-            
-            if response.choices[0].message.content is not None:
-                    full_response += response.choices[0].message.content
-                    message_placeholder.markdown(full_response + "▌")
-            
-            # Final update to placeholder after the stream ends
-            message_placeholder.markdown(full_response)
-            
-            # Guardar en session_state
-            st.session_state.full_response = full_response
-            st.session_state.analysis_done = True
-            
-            if Expert== profile_imgenh:
-               st.session_state.mi_respuesta= response.choices[0].message.content
-    
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
+# Mostrar resultados del análisis
+if st.session_state.analysis_done and st.session_state.full_response:
+    st.markdown("---")
+    st.markdown('<div class="section-title">📜 Análisis Mitológico y Científico</div>', unsafe_allow_html=True)
+    st.markdown('<div class="response-box">', unsafe_allow_html=True)
+    st.write(st.session_state.full_response)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# Mostrar la funcionalidad de crear historia si ya se hizo el análisis
-if st.session_state.analysis_done:
-    st.divider()
-    st.subheader("📚 ¿Quieres crear una historia?")
-    
-    if st.button("✨ Crear historia infantil"):
-        with st.spinner("Creando historia..."):
-            story_prompt = f"Basándote en esta descripción: '{st.session_state.full_response}', crea una historia infantil breve y entretenida. La historia debe ser creativa y apropiada para niños."
-            
-            story_response = openai.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": story_prompt}],
-                max_tokens=500,
-            )
-            
-            st.markdown("**📖 Tu historia:**")
-            st.write(story_response.choices[0].message.content)
-
-# Warnings for user action required
-if not api_key:
-    st.warning("Por favor ingresa tu API key.")
+# Footer
+st.markdown("---")
+st.markdown(
+    "<div style='text-align: center; color: #8B4789; padding: 2rem 0;'>"
+    "✨ Descubre la magia en tus trazos • Mythos Canvas 🔮"
+    "</div>",
+    unsafe_allow_html=True
+)
