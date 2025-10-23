@@ -143,7 +143,7 @@ canvas_result = st_canvas(
 st.markdown('</div>', unsafe_allow_html=True)
 
 # Botón de análisis
-if st.button("🔍 Analizar Dibujo Mitológico", use_container_width=True, type="primary"):
+if st.button("Analizar Dibujo Mitológico", use_container_width=True, type="primary"):
     if canvas_result.image_data is not None and api_key:
         with st.spinner("🔮 Consultando los secretos del universo..."):
             # Procesar imagen
@@ -215,16 +215,7 @@ Responde en español, sé detallado pero conciso, separando claramente cada secc
 # Mostrar resultados del análisis
 if st.session_state.analysis_done and st.session_state.full_response:
     st.markdown("---")
-    st.markdown('<div class="section-title">📜 Análisis Mitológico y Científico</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Análisis Mitológico y Científico</div>', unsafe_allow_html=True)
     st.markdown('<div class="response-box">', unsafe_allow_html=True)
     st.write(st.session_state.full_response)
     st.markdown('</div>', unsafe_allow_html=True)
-
-# Footer
-st.markdown("---")
-st.markdown(
-    "<div style='text-align: center; color: #8B4789; padding: 2rem 0;'>"
-    "✨ Descubre la magia en tus trazos • Mythos Canvas 🔮"
-    "</div>",
-    unsafe_allow_html=True
-)
