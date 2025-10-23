@@ -50,13 +50,6 @@ st.markdown("""
         text-align: center;
         margin-bottom: 2rem;
     }
-    .sidebar-section {
-        background: linear-gradient(135deg, #F8E6F2, #F0D4E6);
-        padding: 1.5rem;
-        border-radius: 16px;
-        margin: 1rem 0;
-        border: 1px solid #E6A8D7;
-    }
     .canvas-container {
         background: linear-gradient(135deg, #FDF6F8, #FAF0F4);
         border: 3px solid #E6A8D7;
@@ -80,14 +73,6 @@ st.markdown("""
         background: linear-gradient(135deg, #7A3A78, #C891B4);
         transform: translateY(-2px);
         transition: all 0.3s ease;
-    }
-    .response-box {
-        background: linear-gradient(135deg, #F8F0F5, #F4E8F1);
-        border: 2px solid #E6A8D7;
-        border-radius: 16px;
-        padding: 2rem;
-        margin: 1rem 0;
-        box-shadow: 0 4px 15px rgba(139, 71, 137, 0.1);
     }
     .mythology-section {
         background: linear-gradient(135deg, #FFF0F5, #FFE4EC);
