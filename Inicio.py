@@ -104,24 +104,20 @@ st.markdown('<div class="subtitle">Descubre los secretos mitológicos y científ
 
 # Sidebar
 with st.sidebar:
-    st.markdown("### ⚙️ Configuración")
+    st.markdown("### Configuración")
     
     with st.container():
-        st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
         st.markdown("**🎨 Herramientas de Dibujo**")
         stroke_width = st.slider('Ancho del trazo', 1, 25, 8)
         stroke_color = st.color_picker('Color del trazo', '#8B4789')
-        st.markdown('</div>', unsafe_allow_html=True)
     
     with st.container():
-        st.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
         st.markdown("**🔑 Configuración API**")
         api_key = st.text_input('Clave de OpenAI', type="password", 
                                help="Ingresa tu API key de OpenAI para usar la inteligencia artificial")
-        st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown("---")
-    st.markdown("### 📖 Acerca de")
+    st.markdown("### Acerca de")
     st.markdown("""
     **Mythos Canvas** analiza tus dibujos y revela:
     - **Mitología** relacionada
@@ -131,7 +127,7 @@ with st.sidebar:
     """)
 
 # Área principal de dibujo
-st.markdown('<div class="section-title">✏️ Panel de Dibujo</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Panel de Dibujo</div>', unsafe_allow_html=True)
 st.markdown('<div class="canvas-container">', unsafe_allow_html=True)
 
 canvas_result = st_canvas(
