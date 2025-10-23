@@ -128,7 +128,6 @@ with st.sidebar:
 
 # Área principal de dibujo
 st.markdown('<div class="section-title">Panel de Dibujo</div>', unsafe_allow_html=True)
-st.markdown('<div class="canvas-container">', unsafe_allow_html=True)
 
 canvas_result = st_canvas(
     fill_color="rgba(139, 71, 137, 0.2)",
