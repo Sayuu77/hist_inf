@@ -107,7 +107,7 @@ with st.sidebar:
     st.markdown("### Configuración")
     
     with st.container():
-        st.markdown("**🎨 Herramientas de Dibujo**")
+        st.markdown("**Herramientas de Dibujo**")
         stroke_width = st.slider('Ancho del trazo', 1, 25, 8)
         stroke_color = st.color_picker('Color del trazo', '#8B4789')
     
